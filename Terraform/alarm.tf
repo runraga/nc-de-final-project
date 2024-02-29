@@ -8,7 +8,7 @@ resource "aws_cloudwatch_log_metric_filter" "extraction_cloudwatch_log_group" {
         log_group_name (str): The name of the CloudWatch Logs group to associate the metric filter with.
 
     Returns:
-        None
+        None 
     */
     name = "ReadError"
     pattern = "ERROR"
