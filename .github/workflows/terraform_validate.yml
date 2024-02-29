@@ -1,0 +1,51 @@
+name: Terraform Validate
+on:
+  push:
+    paths:
+      - "Terraform/*.tf"
+      - "Terraform/*.tf.json"
+    branches:
+      - '*'
+      - '!main'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  terraform-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_SECRET_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Check for utility bucket
+        run: aws s3 ls | grep ${{ secrets.UTILITY_BUCKET }}
+
+      - name: Compile git.tfvars
+        working-directory: Terraform
+        run: ../scripts/makevars.sh git.tfvars \
+          username::"${{ secrets.PGUSER }}" \
+          password::"${{ secrets.PGPASSWORD }}" \
+          port::"${{ secrets.PGPORT }}" \
+          host::"${{ secrets.PGHOST }}" \
+          database::"${{ secrets.PGDATABASE }}" \
+          OLAP_username::"${{ secrets.PGUSER}}" \
+          OLAP_password::"${{ secrets.OLAP_PASSWORD}}" \
+          OLAP_host::"${{ secrets.OLAP_HOST}}" \
+          OLAP_port::"${{ secrets.PGPORT}}" \
+          OLAP_database::"${{ secrets.OLAP_DATABASE}}" \
+          OLAP_schema::"${{ secrets.PGUSER}}" \
+      - name: Terraform Init
+        working-directory: Terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: Terraform
+        run: terraform plan -var-file git.tfvars

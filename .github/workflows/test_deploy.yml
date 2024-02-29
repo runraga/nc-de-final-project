@@ -1,0 +1,114 @@
+name: Test & Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  terraform-validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_SECRET_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Check for utility bucket
+        run: aws s3 ls | grep ${{ secrets.UTILITY_BUCKET }}
+
+      - name: Terraform Init
+        working-directory: Terraform
+        run: terraform init
+
+      - name: Run Validation
+        working-directory: Terraform
+        run: terraform validate
+  run-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup venv
+        run: make actions-init
+
+      - name: Run Security-Checks
+        run: make run-security
+
+      - name: Run Flake
+        run: make run-flake
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup venv
+        run: make actions-init
+
+      - name: Run tests
+        run: make unit-tests
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+      - run-tests
+      - run-checks
+      - terraform-validate
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup AWS CLI
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: eu-west-2
+          aws-access-key-id: ${{ secrets.AWS_SECRET_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Compile git.tfvars
+        working-directory: Terraform
+        run: ../scripts/makevars.sh git.tfvars \
+          username::"${{ secrets.PGUSER }}" \
+          password::"${{ secrets.PGPASSWORD }}" \
+          port::"${{ secrets.PGPORT }}" \
+          host::"${{ secrets.PGHOST }}" \
+          database::"${{ secrets.PGDATABASE }}"
+          OLAP_username::"${{ secrets.PGUSER}}" \
+          OLAP_password::"${{ secrets.OLAP_PASSWORD}}" \
+          OLAP_host::"${{ secrets.OLAP_HOST}}" \
+          OLAP_port::"${{ secrets.PGPORT}}" \
+          OLAP_database::"${{ secrets.OLAP_DATABASE}}" \
+          OLAP_schema::"${{ secrets.PGUSER}}" \
+
+      - name: Terraform Init
+        working-directory: Terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: Terraform
+        run: terraform plan -var-file git.tfvars
+
+      - name: Terrafrom Apply
+        working-directory: Terraform
+        run: terraform apply -auto-approve -var-file git.tfvars
+
+      - name: Terrafrom Apply
+        working-directory: Terraform
+        run: terraform apply -auto-approve -var-file git.tfvars

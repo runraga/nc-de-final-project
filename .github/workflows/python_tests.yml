@@ -1,0 +1,51 @@
+name: Python Tests
+on:
+  push:
+    paths:
+      - "src/**"
+      - "test/**"
+      - "requirements.txt"
+    branches:
+      - '*'
+      - '!main'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup venv
+        run: make actions-init
+
+      - name: Run Security-Checks
+        run: make run-security
+
+      - name: Run Flake
+        run: make run-flake
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Setup venv
+        run: make actions-init
+
+      - name: Run tests
+        run: make unit-tests
