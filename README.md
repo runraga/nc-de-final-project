@@ -1,23 +1,28 @@
-# de-group-project Rannoch
+# Data Lakehouse
+### Short description
+An AWS cloud-based solution for processing and transforming online transaction database into an online analytical database lakehouse using an ETL approach.
 
-Data engineering group project
+### Languages used
+- Python
+- Terraform
+- SQL
+- GitHub Workflow
+- Amazon Web Services
 
-[![Test & Deploy](https://github.com/Catamondium/de-group-project/actions/workflows/test_deploy.yml/badge.svg?branch=main&event=push)](https://github.com/Catamondium/de-group-project/actions/workflows/test_deploy.yml)
+### Overview
+This group project was completed as part of the Northcoders Data Engineering course. It's goal was to create an application to extract, transform and load data from a transactional database to a STAR schema analytics database.
 
-## DOCS
+The minimum viable product produced consisted of: 
+- two S3 buckets for extracted and transformed data in parquet format
+- three Python Lambdas to extact data from the OLTP database, transform data in to target STAR schemas and to load data into the OLAP database
+- CloudWatch logs and alarms to monitor lambda performance
 
-- [Python3.11](https://docs.python.org/3.11/#): [Pandas](https://pandas.pydata.org/docs/), [Boto3](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html), [AWSwrangler](https://aws-sdk-pandas.readthedocs.io/en/stable/api.html)
-- Test: [Pytest](https://docs.pytest.org/en/7.1.x/contents.html), [Coverage](https://coverage.readthedocs.io/en/7.4.1/)
-- Cloud: [AWS](https://docs.aws.amazon.com/), [Terraform](https://developer.hashicorp.com/terraform/docs)
-- Build: [Make](https://www.gnu.org/software/make/manual/make.html), [Actions](https://docs.github.com/en/actions)
-- [Git](https://git-scm.com/doc)
+[![N|Solid](https://github.com/runraga/nc-de-final-project/blob/main/diagrams/MVP.png)](https://github.com/runraga/nc-de-final-project/blob/main/diagrams/MVP.png)
 
-## Common
+A CI/CD automation pipeline was set up for the application using:
+- Git Hooks to enforce fully unit tested (Jest), PEP8 compliant and 'safe' python code
+- Terraform to manage infrastructure in AWS
+- GitHub workflow for continuous deployment of code as it was commited to the main branch
 
-[Trello](https://trello.com/b/CEoyv2AQ/northcoders), [Specification](https://github.com/northcoders/de-project-specification)
-- DB diagrams
-  - [OLTP](https://dbdiagram.io/d/SampleDB-6332fecf7b3d2034ffcaaa92)
-  - OLAP [full](https://dbdiagram.io/d/RevisedDW-63a19c5399cb1f3b55a27eca) **Inaccurate**
-    - [Sales Star](https://dbdiagram.io/d/SampleDW-Sales-637a423fc9abfc611173f637)
-    - [Purchases Star](https://dbdiagram.io/d/SampleDW-Purchases-637b3e8bc9abfc61117419ee)
-    - [Payments Star](https://dbdiagram.io/d/SampleDW-Pmt-637b41a5c9abfc6111741ae8)
+### Future Features
+
