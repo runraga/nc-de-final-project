@@ -25,4 +25,6 @@ A CI/CD automation pipeline was set up for the application using:
 - GitHub workflow for continuous deployment of code as it was commited to the main branch
 
 ### Future Features
-
+- Improvements to integration testing
+- Restructure ingestion bucket data to better track raw data
+- Refactor to enable history tracking of transactions in OLAP database
